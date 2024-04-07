@@ -302,7 +302,7 @@ transformer.compile(
     "rmsprop", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
 )
 transformer.fit(train_ds, epochs=epochs, validation_data=val_ds)
-transformer.save('model.h5')
+transformer.save_weights('transformer.weights.h5')
 
 spa_vocab = spa_vectorization.get_vocabulary()
 spa_index_lookup = dict(zip(range(len(spa_vocab)), spa_vocab))
@@ -322,6 +322,7 @@ def decode_sequence(input_sentence):
         ).item(0)
         sampled_token = spa_index_lookup[sampled_token_index]
         decoded_sentence += " " + sampled_token
+        # print('Decoded sentence: ', decoded_sentence)
 
         if sampled_token == "[end]":
             break
@@ -332,3 +333,5 @@ test_eng_texts = [pair[0] for pair in test_pairs]
 for _ in range(30):
     input_sentence = random.choice(test_eng_texts)
     translated = decode_sequence(input_sentence)
+    print('Input sentence: ',input_sentence,' Output Sentence', translated)
+    print('\n----------\n')
