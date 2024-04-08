@@ -313,7 +313,7 @@ transformer.compile(
 transformer.fit(train_ds, epochs=epochs, validation_data=val_ds)
 transformer.save_weights('transformer.weights.h5')
 transformer.save('transformer.keras')
-transformer.export('model.keras')
+transformer.export('content')
 pickle.dump({'config': spa_vectorization.get_config(),
              'weights': spa_vectorization.get_weights()}
             , open("spa_vectorization.pkl", "wb"))
