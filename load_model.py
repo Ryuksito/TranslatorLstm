@@ -304,7 +304,7 @@ transformer = keras.Model(
 
 #----------------------------------------------------------------
 
-epochs = 1  # This should be at least 30 for convergence
+epochs = 30  # This should be at least 30 for convergence
 
 transformer.summary()
 transformer.compile(
