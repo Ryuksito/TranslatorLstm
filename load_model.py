@@ -304,51 +304,13 @@ transformer = keras.Model(
 
 #----------------------------------------------------------------
 
-epochs = 5  # This should be at least 30 for convergence
+epochs = 1  # This should be at least 30 for convergence
 
 transformer.summary()
 transformer.compile(
     "rmsprop", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
 )
 transformer.fit(train_ds, epochs=epochs, validation_data=val_ds)
-transformer.save_weights('transformer.weights.h5')
-transformer.save('transformer.keras')
-transformer.export('content')
-pickle.dump({'config': spa_vectorization.get_config(),
-             'weights': spa_vectorization.get_weights()}
-            , open("spa_vectorization.pkl", "wb"))
-
-pickle.dump({'config': eng_vectorization.get_config(),
-             'weights': eng_vectorization.get_weights()}
-            , open("eng_vectorization.pkl", "wb"))
-
-#----------------------------------------------------------------
-
-embed_dim = 256
-latent_dim = 2048
-num_heads = 8
-
-encoder_inputs = keras.Input(shape=(None,), dtype="int64", name="encoder_inputs")
-x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(encoder_inputs)
-encoder_outputs = TransformerEncoder(embed_dim, latent_dim, num_heads)(x)
-encoder = keras.Model(encoder_inputs, encoder_outputs)
-
-decoder_inputs = keras.Input(shape=(None,), dtype="int64", name="decoder_inputs")
-encoded_seq_inputs = keras.Input(shape=(None, embed_dim), name="decoder_state_inputs")
-x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(decoder_inputs)
-x = TransformerDecoder(embed_dim, latent_dim, num_heads)(x, encoded_seq_inputs)
-x = layers.Dropout(0.5)(x)
-decoder_outputs = layers.Dense(vocab_size, activation="softmax")(x)
-decoder = keras.Model([decoder_inputs, encoded_seq_inputs], decoder_outputs)
-
-decoder_outputs = decoder([decoder_inputs, encoder_outputs])
-
-transformer_weights_loaded = keras.Model(
-    [encoder_inputs, decoder_inputs], decoder_outputs, name="transformer"
-)
-transformer_weights_loaded.load_weights('transformer.weights.h5')
-transformer_weights_loaded.summary()
-
 #----------------------------------------------------------------
 
 spa_vocab = spa_vectorization.get_vocabulary()
@@ -359,7 +321,6 @@ max_decoded_sentence_length = 20
 def decode_sequence(input_sentence):
     tokenized_input_sentence = eng_vectorization([input_sentence])
     decoded_sentence = "[start]"
-    decoded_sentence2 = "[start]"
     for i in range(max_decoded_sentence_length):
         tokenized_target_sentence = spa_vectorization([decoded_sentence])[:, :-1]
         predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
@@ -372,22 +333,8 @@ def decode_sequence(input_sentence):
         sampled_token = spa_index_lookup[sampled_token_index]
         decoded_sentence += " " + sampled_token
 
-        #----------------------------------------------------------------
-        tokenized_target_sentence = spa_vectorization([decoded_sentence2])[:, :-1]
-        predictions = transformer_weights_loaded([tokenized_input_sentence, tokenized_target_sentence])
-
-        # ops.argmax(predictions[0, i, :]) is not a concrete value for jax here
-        sampled_token_index = ops.convert_to_numpy(
-            ops.argmax(predictions[0, i, :])
-        ).item(0)
-        sampled_token = spa_index_lookup[sampled_token_index]
-        decoded_sentence2 += " " + sampled_token
-        
-
         if sampled_token == "[end]":
             break
-    print('Decoded sentence: ', decoded_sentence)
-    print('Decoded sentence2: ', decoded_sentence2)
     return decoded_sentence
 
 
@@ -398,10 +345,11 @@ translated = decode_sequence(input_sentence)
 print('Input sentence: ',input_sentence,' Output Sentence', translated)
 print('\n----------\n')
 
-for _ in range(30):
-    
-    input_sentence = random.choice(test_eng_texts)
-    print('Input sentence: ',input_sentence)
-    translated = decode_sequence(input_sentence)
-    
-    print('\n----------\n')
+try:
+    while True:
+        input_sentence = input('Write your sentence: ')
+        translated = decode_sequence(input_sentence)
+        print('Input sentence: ',input_sentence,'\nTranslate Sentence', translated)
+        print('\n----------\n')
+except KeyboardInterrupt:
+    print('Complete execution')
