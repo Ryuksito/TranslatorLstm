@@ -1,6 +1,6 @@
 import keras.ops as ops
 import os
-import os
+import pickle
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -324,7 +324,10 @@ decoder_outputs = decoder([decoder_inputs, encoder_outputs])
 transformer_weights_loaded = keras.Model(
     [encoder_inputs, decoder_inputs], decoder_outputs, name="transformer"
 )
-transformer_weights_loaded.load_weights('transformer.weights.h5')
+# transformer_weights_loaded.load_weights('transformer.weights.h5')
+transformer_weights_loaded = keras.models.load_model('transformer')
+spa_vectorization = pickle.load(open("spa_vectorization.pkl", "rb"))
+eng_vectorization = pickle.load(open("eng_vectorization.pkl", "rb"))
 transformer_weights_loaded.summary()
 
 #----------------------------------------------------------------

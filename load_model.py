@@ -1,6 +1,7 @@
 import keras.ops as ops
 import os
-import os
+import json
+import pickle
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -311,6 +312,14 @@ transformer.compile(
 )
 transformer.fit(train_ds, epochs=epochs, validation_data=val_ds)
 transformer.save_weights('transformer.weights.h5')
+transformer.save('transformer')
+pickle.dump({'config': spa_vectorization.get_config(),
+             'weights': spa_vectorization.get_weights()}
+            , open("spa_vectorization.pkl", "wb"))
+
+pickle.dump({'config': eng_vectorization.get_config(),
+             'weights': eng_vectorization.get_weights()}
+            , open("eng_vectorization.pkl", "wb"))
 
 #----------------------------------------------------------------
 
@@ -377,7 +386,7 @@ def decode_sequence(input_sentence):
         if sampled_token == "[end]":
             break
     print('Decoded sentence: ', decoded_sentence)
-    print('Decoded sentence: ', decoded_sentence2)
+    print('Decoded sentence2: ', decoded_sentence2)
     return decoded_sentence
 
 
