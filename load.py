@@ -337,11 +337,10 @@ max_decoded_sentence_length = 20
 def decode_sequence(input_sentence):
     tokenized_input_sentence = eng_vectorization([input_sentence])
     decoded_sentence = "[start]"
-    decoded_sentence2 = "[start]"
     for i in range(max_decoded_sentence_length):
         tokenized_target_sentence = spa_vectorization([decoded_sentence])[:, :-1]
-        predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
-        # predictions = transformer_weights_loaded([tokenized_input_sentence, tokenized_target_sentence])
+        # predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
+        predictions = transformer_weights_loaded([tokenized_input_sentence, tokenized_target_sentence])
 
         # ops.argmax(predictions[0, i, :]) is not a concrete value for jax here
         sampled_token_index = ops.convert_to_numpy(
@@ -351,30 +350,19 @@ def decode_sequence(input_sentence):
         decoded_sentence += " " + sampled_token
 
         #----------------------------------------------------------------
-        tokenized_target_sentence = spa_vectorization([decoded_sentence2])[:, :-1]
-        predictions = transformer_weights_loaded([tokenized_input_sentence, tokenized_target_sentence])
-
-        # ops.argmax(predictions[0, i, :]) is not a concrete value for jax here
-        sampled_token_index = ops.convert_to_numpy(
-            ops.argmax(predictions[0, i, :])
-        ).item(0)
-        sampled_token = spa_index_lookup[sampled_token_index]
-        decoded_sentence2 += " " + sampled_token
-        
 
         if sampled_token == "[end]":
             break
     print('Decoded sentence: ', decoded_sentence)
-    print('Decoded sentence: ', decoded_sentence2)
     return decoded_sentence
 
 
 test_eng_texts = [pair[0] for pair in test_pairs]
 
-input_sentence = 'Children like watching television'
-translated = decode_sequence(input_sentence)
-print('Input sentence: ',input_sentence,' Output Sentence', translated)
-print('\n----------\n')
+# input_sentence = 'Children like watching television'
+# translated = decode_sequence(input_sentence)
+# print('Input sentence: ',input_sentence,' Output Sentence', translated)
+# print('\n----------\n')
 
 for _ in range(30):
     
