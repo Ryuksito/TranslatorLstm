@@ -326,6 +326,7 @@ transformer_weights_loaded = keras.Model(
 )
 # transformer_weights_loaded.load_weights('transformer.weights.h5')
 transformer_weights_loaded = keras.models.load_model('transformer')
+transformer_weights_loaded = keras.saving.load_model('transformer.keras')
 spa_vectorization = pickle.load(open("spa_vectorization.pkl", "rb"))
 eng_vectorization = pickle.load(open("eng_vectorization.pkl", "rb"))
 transformer_weights_loaded.summary()
