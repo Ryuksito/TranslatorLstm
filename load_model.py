@@ -352,4 +352,4 @@ try:
         print('Input sentence: ',input_sentence,'\nTranslate Sentence', translated)
         print('\n----------\n')
 except KeyboardInterrupt:
-    print('Complete execution')
+    print('\nComplete execution')
