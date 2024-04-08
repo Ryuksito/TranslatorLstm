@@ -304,7 +304,7 @@ transformer = keras.Model(
 
 #----------------------------------------------------------------
 
-epochs = 1  # This should be at least 30 for convergence
+epochs = 5  # This should be at least 30 for convergence
 
 transformer.summary()
 transformer.compile(
@@ -313,6 +313,7 @@ transformer.compile(
 transformer.fit(train_ds, epochs=epochs, validation_data=val_ds)
 transformer.save_weights('transformer.weights.h5')
 transformer.save('transformer.keras')
+transformer.export('/content/model.keras')
 pickle.dump({'config': spa_vectorization.get_config(),
              'weights': spa_vectorization.get_weights()}
             , open("spa_vectorization.pkl", "wb"))
